@@ -1,2 +1,11 @@
 /io_bcry_exporter/__pycache__
 /io_KCD2_Blender_Toolkit/__pycache__
+symlink.bat
+/io_KCD2_Blender_Toolkit/handlers/__pycache__
+/io_KCD2_Blender_Toolkit/xml/__pycache__
+/io_KCD2_Blender_Toolkit/xml/weapons/__pycache__
+/io_KCD2_Blender_Toolkit/handlers/__pycache__
+/io_KCD2_Blender_Toolkit/handlers/__pycache__
+io_KCD2_Blender_Toolkit/handlers/__pycache__/cgf_handler.cpython-311.pyc
+io_KCD2_Blender_Toolkit/handlers/__pycache__/collada_handler.cpython-311.pyc
+io_KCD2_Blender_Toolkit/handlers/__pycache__/skin_handler.cpython-311.pyc

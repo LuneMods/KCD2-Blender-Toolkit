@@ -16,8 +16,9 @@ def skin_to_dae(input_file):
 
     output_file = os.path.splitext(input_file)[0] + ".dae"
 
-    addon_dir = os.path.dirname(os.path.abspath(__file__))
-    convertor_path = os.path.join(addon_dir, "External", "KCD2-Convertor", "KCD2-Convertor.exe")
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    parent_dir = os.path.dirname(current_dir)
+    convertor_path = os.path.join(parent_dir, "External", "KCD2-Convertor", "KCD2-Convertor.exe")
 
     if not os.path.isfile(convertor_path):
         print(f"Error: KCD2-Convertor.exe not found at '{convertor_path}'.")
