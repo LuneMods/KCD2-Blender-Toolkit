@@ -10,7 +10,7 @@ Ensure you are using the latest version of the KCD2 Blender Toolkit.
 
 In the Longsword_Template.blend you will find an example of how a weapon should be set up in blender.
 
-<img src="images/1. Scene Setup.png">
+<img src="Images/1. Scene Setup.png">
 
 The models that will be exported are in the `cry_export_nodes` Collection.
 The `WeaponName.cgf` collection inside `cry_export_nodes` is what will be exported in the final .CGF file.
@@ -28,10 +28,10 @@ If you need to create more, use the `Add Physics Proxy` feature in the `BCry Exp
 
 The `Longsword` & `capsuleproxy` objects must have their transforms applied (`ctrl+A`), so that the origin of the model is at 0,0,0 (which is the same location as `slt_0`)
 
-<img src="images/Physics Proxies.png">
+<img src="Images/Physics Proxies.png">
 
 The hands in the `helpers` collection are just to assist you in lining up your model, and will not be exported.
 
 Once you are ready to export your model, use the `Export to CryEngine` button in the `BCry Exporter` tab.
 
-<img src="images/Export Button.png">
+<img src="Images/Export Button.png">
