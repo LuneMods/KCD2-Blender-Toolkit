@@ -13,3 +13,9 @@ Current features:
 - Directly importing .skin & .cgf files
 - Vertex Colors (RGB and Alpha layers)
 - Exporting to .skin & .cgf using a custom branch of BCry Exporter
+
+I have tested creating the following Assets & can confirm that they work (mostly):
+- Weapons
+- Helmets (need to modify the visor bone roll -180 deg in edit mode)
+- Clothing
+- Body Meshes (there might be some funky morphtargets missing but seems OK in practice?) 
