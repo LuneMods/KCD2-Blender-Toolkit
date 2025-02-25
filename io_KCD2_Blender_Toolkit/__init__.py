@@ -12,7 +12,7 @@ import bpy
 from bpy_extras.io_utils import ImportHelper
 from bpy.types import AddonPreferences, PropertyGroup
 from bpy.props import StringProperty, IntProperty, FloatProperty, EnumProperty
-from . import importers, ui
+from . import importers, material_handler, ui
 
 class AddonSettings(AddonPreferences):
     bl_idname = __name__
@@ -28,7 +28,7 @@ class AddonSettings(AddonPreferences):
         layout = self.layout
         layout.prop(self, "filepath")
 
-modules = [importers, ui]
+modules = [importers, ui, material_handler]
 classes = [AddonSettings]
 
 def register():
