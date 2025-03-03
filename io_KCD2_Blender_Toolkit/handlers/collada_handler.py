@@ -20,7 +20,9 @@ def import_collada(filepath, context, operator):
             #fix_vertex_colors(mesh) #leave as-is for now, vertex colors will be set using a different system.
             fix_material_slots(obj, filepath)
             set_smooth(mesh)
-            create_cryengine_nodes(operator) #only the exporter so far
+            create_export_node(operator) #only the exporter so far
+
+            break #only 1x mesh per import supported for now
 
     print(obj["mtl_directory"])
     operator.report({'INFO'}, "Import and conversion completed successfully.")
@@ -113,19 +115,16 @@ def fix_material_slots(obj, filepath):
         for face_index in face_indices:
             obj.data.polygons[face_index].material_index = new_material_index
 
-def create_cryengine_nodes(operator):
+def create_export_node(operator):
     for obj in bpy.context.selected_objects:
         if obj.type == 'MESH':
             bpy.context.view_layer.objects.active = obj  # Set active object
             bpy.ops.object.select_all(action='DESELECT')  # Deselect all
             obj.select_set(True)
+
+            for child in obj.children_recursive:
+                child.select_set(True)
     
     model_type = operator.model_type
-    if model_type == "skin":
-        bpy.ops.bcry.add_cry_export_node(node_type="skin")
-
-
-
-
-    
-
+    if model_type != "":
+        bpy.ops.bcry.add_cry_export_node(node_type=model_type)

@@ -17,13 +17,15 @@ class Importer_KCD2_Collada(bpy.types.Operator, ImportHelper):
     filename_ext = ".dae"
     filter_glob: StringProperty(default="*.dae", options={'HIDDEN'}, maxlen=255)
 
+    model_type = ""
+
     def execute(self, context):
         filepath = self.filepath
         report = collada_handler.import_collada(filepath, context, self)
 
-
         return report
     
+
 class Importer_KCD2_SKIN(bpy.types.Operator, ImportHelper):
     """Import KCD2 Skin"""
     bl_idname = "import_scene.kcd2_skin"
@@ -32,11 +34,11 @@ class Importer_KCD2_SKIN(bpy.types.Operator, ImportHelper):
     
     filename_ext = ".skin"
     filter_glob: StringProperty(default="*.skin", options={'HIDDEN'}, maxlen=255)
+
     model_type = "skin"
 
     obj = None
     
-    #import_materials: BoolProperty(name="Import Materials", description="Import materials", default=True)
     import_normals: BoolProperty(name="Import normals", description="Import normals", default=True)
 
     def execute(self, context):
@@ -66,7 +68,8 @@ class Importer_KCD2_CGF(bpy.types.Operator, ImportHelper):
     filename_ext = ".cgf"
     filter_glob: StringProperty(default="*.cgf", options={'HIDDEN'}, maxlen=255)
 
-    #import_materials: BoolProperty(name="Import Materials", description="Import materials", default=True)
+    model_type = "cgf"
+
     import_normals: BoolProperty(name="Import normals", description="Import normals", default=False)
 
     def execute(self, context):
@@ -80,10 +83,6 @@ class Importer_KCD2_CGF(bpy.types.Operator, ImportHelper):
             
             collada_handler.import_collada(dae_filepath, context, self)
             self.report({'INFO'}, "Model imported successfully.")
-            
-            """ if self.import_materials:
-                print("Importing materials for:", dae_filepath)
-                material_handler.import_materials(dae_filepath) """
 
         except Exception as e:
             self.report({'ERROR'}, f"Import failed: {e}")
