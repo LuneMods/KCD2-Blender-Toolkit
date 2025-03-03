@@ -16,7 +16,7 @@ def import_collada(filepath, context, operator):
         if obj.type == 'MESH':
             mesh = obj.data
             
-            fix_vertex_colors(mesh)
+            #fix_vertex_colors(mesh)
             fix_material_slots(obj, filepath)
             set_smooth(mesh)
 

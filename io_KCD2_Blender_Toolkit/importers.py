@@ -36,7 +36,7 @@ class Importer_KCD2_SKIN(bpy.types.Operator, ImportHelper):
 
     # Checkbox property
     #import_materials: BoolProperty(name="Import Materials", description="Import materials", default=True)
-    import_normals: BoolProperty(name="Import normals", description="Import normals", default=False)
+    import_normals: BoolProperty(name="Import normals", description="Import normals", default=True)
 
     def execute(self, context):
         skin_filepath = self.filepath
