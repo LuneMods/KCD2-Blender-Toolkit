@@ -9,20 +9,22 @@ import os
 def import_collada(filepath, context, operator):
     # Import the COLLADA file
     bpy.ops.wm.collada_import(filepath=filepath, custom_normals=operator.import_normals)
-    
+    filename = os.path.splitext(os.path.basename(filepath))[0]
+
     # Process imported meshes
     for obj in bpy.context.selected_objects:
         obj["mtl_directory"] = os.path.dirname(filepath)
         if obj.type == 'MESH':
             mesh = obj.data
             
-            #fix_vertex_colors(mesh)
+            #fix_vertex_colors(mesh) #leave as-is for now, vertex colors will be set using a different system.
             fix_material_slots(obj, filepath)
             set_smooth(mesh)
+            create_cryengine_nodes(operator) #only the exporter so far
 
     print(obj["mtl_directory"])
     operator.report({'INFO'}, "Import and conversion completed successfully.")
-    return {'FINISHED'}
+    return obj
 
 
 def set_smooth(mesh):
@@ -35,7 +37,6 @@ def set_smooth(mesh):
     bm.to_mesh(mesh)
     bm.free()
     
-
 def fix_vertex_colors(mesh):
     if mesh.vertex_colors:
         vc_layer = mesh.vertex_colors.active  # Get active vertex color layer
@@ -51,12 +52,25 @@ def fix_vertex_colors(mesh):
             for loop in face.loops:
                 original_color = loop[color_layer]
                 alpha = original_color[3]
-                rounded_alpha = alpha * 0.255
-                loop[new_color_layer] = (rounded_alpha, 0, 0, 1)
+
+                srgb_alpha = linear_to_srgb(alpha)
+
+                loop[new_color_layer] = (srgb_alpha, 1, 1, 1)
 
         bm.to_mesh(mesh)
         bm.free()
     
+def linear_to_srgb(linear):
+    if linear <= 0.0031308:
+        return 12.92 * linear
+    else:
+        return 1.055 * (linear ** (1.0 / 2.4)) - 0.055
+
+def srgb_to_linear(srgb):
+    if srgb <= 0.04045:
+        return srgb / 12.92
+    else:
+        return ((srgb + 0.055) / 1.055) ** 2.4
 
 def get_matched_materials(filepath):
     tree = ET.parse(filepath)
@@ -98,3 +112,20 @@ def fix_material_slots(obj, filepath):
         
         for face_index in face_indices:
             obj.data.polygons[face_index].material_index = new_material_index
+
+def create_cryengine_nodes(operator):
+    for obj in bpy.context.selected_objects:
+        if obj.type == 'MESH':
+            bpy.context.view_layer.objects.active = obj  # Set active object
+            bpy.ops.object.select_all(action='DESELECT')  # Deselect all
+            obj.select_set(True)
+    
+    model_type = operator.model_type
+    if model_type == "skin":
+        bpy.ops.bcry.add_cry_export_node(node_type="skin")
+
+
+
+
+    
+

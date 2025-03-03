@@ -18,7 +18,6 @@ class UI_Import(UI_BasePanel):
         layout.operator("import_scene.kcd2_skin", text="Import Skin (.skin)")
         layout.operator("import_scene.kcd2_cgf", text="Import CGF (.cgf)")
 
-
 class UI_Materials(UI_BasePanel):
     bl_label = "Materials"
     bl_idname = "KCD2_PT_Materials"
@@ -47,6 +46,16 @@ class UI_Materials(UI_BasePanel):
         layout.operator("mtl.load_mtl", text="Load Material")
 
 
+class UI_Export(UI_BasePanel):
+    bl_label = "Export"
+    bl_idname = "KCD2_PT_Export" 
+
+    def draw(self, context):
+        layout = self.layout
+        layout.operator("bcry.export_to_game", text="Export to KCD2")
+
+
+
 def update_mtl_files(self, context):
     selected_obj = context.active_object
     if selected_obj and selected_obj.type == 'MESH' and "mtl_directory" in selected_obj:
@@ -63,7 +72,6 @@ def update_mtl_files(self, context):
                 print("Error: mtl_directory not found.")
                 return [("NO_FILE", "No .mtl files found", "")]
     return [("NO_FILE", "No .mtl files found", "")]
-
 
 def register_properties():
     bpy.types.Scene.mtl_file_path = bpy.props.StringProperty(
@@ -85,20 +93,19 @@ def register_properties():
         items=update_mtl_files
     )
 
-
 def unregister_properties():
     del bpy.types.Scene.mtl_file_path
     del bpy.types.Scene.selected_mesh
     del bpy.types.Scene.mtl_file_dropdown
 
+classes = [UI_Import, UI_Materials, UI_Export]
 
 def register():
     register_properties()
-    for cls in [UI_Import, UI_Materials]:
+    for cls in classes:
         bpy.utils.register_class(cls)
 
-
 def unregister():
-    for cls in [UI_Import, UI_Materials]:
+    for cls in classes:
         bpy.utils.unregister_class(cls)
     unregister_properties()
