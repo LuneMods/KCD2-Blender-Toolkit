@@ -1,7 +1,7 @@
 # TODO
 ## Problems
 ### HIGH PRIORITY
-- [ ] Vertex count is different after going through rc.exe. This kinda breaks the entire equipment system.
+- [x] Vertex count is different after going through rc.exe. This kinda breaks the entire equipment system.
 - [ ] Importing of physics bones & proxies, for belt physics etc.
 - [ ] cgf meshes get imported with the wrong origin, throws out slot helper locations etc.
 - [ ] Importing of Morph Targets
