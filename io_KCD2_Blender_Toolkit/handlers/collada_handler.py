@@ -17,6 +17,7 @@ def import_collada(filepath, context, operator):
         if obj.type == 'MESH':
             mesh = obj.data
             
+            fix_vertex_colors(mesh)
             fix_material_slots(obj, filepath)
             set_smooth(mesh)
             create_export_node(operator) #only the export node so far
@@ -26,7 +27,6 @@ def import_collada(filepath, context, operator):
     print(obj["mtl_directory"])
     operator.report({'INFO'}, "Import and conversion completed successfully.")
     return obj
-
 
 def set_smooth(mesh):
     bm = bmesh.new()
@@ -92,3 +92,40 @@ def create_export_node(operator):
     model_type = operator.model_type
     if model_type != "":
         bpy.ops.bcry.add_cry_export_node(node_type=model_type)
+
+
+def fix_vertex_colors(mesh):
+    if mesh.vertex_colors:
+        vc_layer = mesh.vertex_colors.active  # Get active vertex color layer
+        new_layer = mesh.color_attributes.new(name="alpha", type='BYTE_COLOR', domain='CORNER')  
+
+        bm = bmesh.new()
+        bm.from_mesh(mesh)
+        bm.loops.layers.color.verify()
+        color_layer = bm.loops.layers.color.get(vc_layer.name)
+        new_color_layer = bm.loops.layers.color.get(new_layer.name)
+
+        for face in bm.faces:
+            for loop in face.loops:
+                original_color = loop[color_layer]
+                alpha = original_color[3]
+
+
+                #srgb_alpha = linear_to_srgb(alpha)
+
+                loop[new_color_layer] = (alpha, 0, 0, 1)
+
+        bm.to_mesh(mesh)
+        bm.free()
+
+def linear_to_srgb(linear):
+    if linear <= 0.0031308:
+        return 12.92 * linear
+    else:
+        return 1.055 * (linear ** (1.0 / 2.4)) - 0.055
+
+def srgb_to_linear(srgb):
+    if srgb <= 0.04045:
+        return srgb / 12.92
+    else:
+        return ((srgb + 0.055) / 1.055) ** 2.4

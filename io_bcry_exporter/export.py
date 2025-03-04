@@ -295,19 +295,29 @@ class CrytekDaeExporter:
 
     def _write_vertex_colors(self, object_, bmesh_, mesh_node, geometry_name):
         float_colors = []
+        alpha_layer = None
+        rgb_layer = None
 
-        active_layer = bmesh_.loops.layers.color.active
-        if object_.data.vertex_colors:
+        # Find the appropriate color layers
+        for layer in bmesh_.loops.layers.color:
+            if layer.name.lower().endswith("alpha"):
+                alpha_layer = layer
+            else:
+                rgb_layer = layer  # Assume the first non-alpha layer is the RGB source
+
+        if rgb_layer or alpha_layer:
             for vert in bmesh_.verts:
                 loop = vert.link_loops[0]
-                color = loop[active_layer]
-                float_colors.extend([color[0], color[1], color[2], color[3]])
+                rgb_color = loop[rgb_layer] if rgb_layer else (1.0, 1.0, 1.0)  # Default white if no RGB layer
+                alpha_value = loop[alpha_layer][0] if alpha_layer else 1.0  # Alpha from first component of alpha layer
 
-        if float_colors:
-            id_ = "{!s}-vcol".format(geometry_name)
-            params = "RGBA"
+                float_colors.extend([rgb_color[0], rgb_color[1], rgb_color[2], alpha_value])
+
+            id_ = f"{geometry_name}-vcol"
+            params = "RGBA" if alpha_layer else "RGBA"
             source = utils.write_source(id_, "float", float_colors, params)
             mesh_node.appendChild(source)
+
 
     def _write_vertices(self, mesh_node, geometry_name):
         vertices = self._doc.createElement("vertices")
