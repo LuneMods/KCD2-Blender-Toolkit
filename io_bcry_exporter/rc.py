@@ -95,8 +95,12 @@ class _DAEConverter:
                 out_file = os.path.join(output_path, group.name)
                 args = [
                     self.__config.rc_path,
+                    "/p=pc",
+                    "/vertexindexformat=u32",
+                    "/threads={processors}",
+                    "/verbose=2",
                     "/refresh",
-                    "/vertexindexformat=u16",
+                    "/vertexpositionformat=f16",
                     out_file]
                 rc_second_pass = subprocess.Popen(args)
             elif node_type == 'i_caf':

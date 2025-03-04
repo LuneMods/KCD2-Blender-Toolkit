@@ -96,8 +96,14 @@ def frame_to_time(frame):
 def matrix_to_string(matrix):
     return str(matrix_to_array(matrix))
 
-
+# 6 decimal places of float precision in collada works fine if 
+# vert positions are read as f16 in rc.exe using /vertexpositionformat=f16
 def floats_to_string(floats, separator=" ", precision="%.6f"):
+    return separator.join(precision % x for x in floats)
+
+
+#added so that vertex colors dont fuck themselves
+def floats_to_string_colors(floats, separator=" ", precision="%.5f"): 
     return separator.join(precision % x for x in floats)
 
 
@@ -1630,12 +1636,20 @@ def write_source(id_, type_, array, params):
         source_data = doc.createElement("float_array")
     else:
         source_data = doc.createElement("{!s}_array".format(type_))
+
     source_data.setAttribute("id", "{!s}-array".format(id_))
     source_data.setAttribute("count", str(length))
+    if params == "RGBA":
+        try:
+            source_data.appendChild(doc.createTextNode(floats_to_string_colors(array)))
+        except TypeError:
+            source_data.appendChild(doc.createTextNode(strings_to_string(array)))
+
     try:
         source_data.appendChild(doc.createTextNode(floats_to_string(array)))
     except TypeError:
         source_data.appendChild(doc.createTextNode(strings_to_string(array)))
+
     technique_common = doc.createElement("technique_common")
     accessor = doc.createElement("accessor")
     accessor.setAttribute("source", "#{!s}-array".format(id_))

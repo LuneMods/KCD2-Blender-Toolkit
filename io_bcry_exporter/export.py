@@ -295,35 +295,29 @@ class CrytekDaeExporter:
 
     def _write_vertex_colors(self, object_, bmesh_, mesh_node, geometry_name):
         float_colors = []
-        alpha_found = False
-        if len(object_.data.vertex_colors) >= 2:
-            rgb_layer = bmesh_.loops.layers.color.get(object_.data.vertex_colors[0].name)
-            alpha_layer = bmesh_.loops.layers.color.get(object_.data.vertex_colors[1].name)
+        alpha_layer = None
+        rgb_layer = None
 
+        # Find the appropriate color layers
+        for layer in bmesh_.loops.layers.color:
+            if layer.name.lower().endswith("alpha"):
+                alpha_layer = layer
+            else:
+                rgb_layer = layer  # Assume the first non-alpha layer is the RGB source
+
+        if rgb_layer or alpha_layer:
             for vert in bmesh_.verts:
                 loop = vert.link_loops[0]
+                rgb_color = loop[rgb_layer] if rgb_layer else (1.0, 1.0, 1.0)  # Default white if no RGB layer
+                alpha_value = loop[alpha_layer][0] if alpha_layer else 1.0  # Alpha from first component of alpha layer
 
-                # Get RGB from the first layer
-                if rgb_layer:
-                    color = loop[rgb_layer]
-                    float_colors.extend([color[0], color[1], color[2]])
-                else:
-                    float_colors.extend([1.0, 1.0, 1.0])  # Default to white if missing
+                float_colors.extend([rgb_color[0], rgb_color[1], rgb_color[2], alpha_value])
 
-                # Get Alpha from the second layer
-                if alpha_layer:
-                    alpha_color = loop[alpha_layer]
-                    alpha_value = alpha_color[0] * (1/0.255)
-                else:
-                    alpha_value = 1.0  # Default to fully opaque if missing
-
-                float_colors.append(alpha_value)
-
-        if float_colors:
-            id_ = "{!s}-vcol".format(geometry_name)
-            params = ("RGBA")
+            id_ = f"{geometry_name}-vcol"
+            params = "RGBA" if alpha_layer else "RGBA"
             source = utils.write_source(id_, "float", float_colors, params)
             mesh_node.appendChild(source)
+
 
     def _write_vertices(self, mesh_node, geometry_name):
         vertices = self._doc.createElement("vertices")
@@ -416,7 +410,6 @@ class CrytekDaeExporter:
         technique = self._doc.createElement("technique")
         technique.setAttribute("profile", profile)
         double_sided = self._doc.createElement("double_sided")
-        #double_sided_value = self._doc.createTextNode("1")
         double_sided_value = self._doc.createTextNode("0")
         double_sided.appendChild(double_sided_value)
         technique.appendChild(double_sided)

@@ -2,7 +2,7 @@ import bpy
 import bmesh
 import math
 from bpy_extras.io_utils import ImportHelper
-from bpy.props import StringProperty
+from bpy.props import StringProperty, BoolProperty
 from .handlers import cgf_handler, skin_handler, collada_handler
 
 
@@ -12,12 +12,19 @@ class Importer_KCD2_Collada(bpy.types.Operator, ImportHelper):
     bl_label = "Import KCD2 COLLADA file (.dae)"
     bl_options = {'REGISTER', 'UNDO'}
     
+    import_normals: BoolProperty(name="Import normals", description="Import normals", default=False)
+    
     filename_ext = ".dae"
     filter_glob: StringProperty(default="*.dae", options={'HIDDEN'}, maxlen=255)
 
-    def execute(self, context):
-        return collada_handler.import_collada(self.filepath, context, self)
+    model_type = ""
 
+    def execute(self, context):
+        filepath = self.filepath
+        report = collada_handler.import_collada(filepath, context, self)
+
+        return report
+    
 
 class Importer_KCD2_SKIN(bpy.types.Operator, ImportHelper):
     """Import KCD2 Skin"""
@@ -28,6 +35,12 @@ class Importer_KCD2_SKIN(bpy.types.Operator, ImportHelper):
     filename_ext = ".skin"
     filter_glob: StringProperty(default="*.skin", options={'HIDDEN'}, maxlen=255)
 
+    model_type = "skin"
+
+    obj = None
+    
+    import_normals: BoolProperty(name="Import normals", description="Import normals", default=True)
+
     def execute(self, context):
         skin_filepath = self.filepath
 
@@ -37,16 +50,15 @@ class Importer_KCD2_SKIN(bpy.types.Operator, ImportHelper):
             if not dae_filepath:
                 raise Exception("Failed to Convert Skin to dae")
             
-            collada_handler.import_collada(dae_filepath, context, self)
+            self.obj = collada_handler.import_collada(dae_filepath, context, self)
             self.report({'INFO'}, "Model imported successfully.")
-            
+
         except Exception as e:
             self.report({'ERROR'}, f"Import failed: {e}")
             return {'CANCELLED'}
 
         return {'FINISHED'}
     
-
 class Importer_KCD2_CGF(bpy.types.Operator, ImportHelper):
     """Import KCD2 CGF"""
     bl_idname = "import_scene.kcd2_cgf"
@@ -55,24 +67,29 @@ class Importer_KCD2_CGF(bpy.types.Operator, ImportHelper):
     
     filename_ext = ".cgf"
     filter_glob: StringProperty(default="*.cgf", options={'HIDDEN'}, maxlen=255)
-    
+
+    model_type = "cgf"
+
+    import_normals: BoolProperty(name="Import normals", description="Import normals", default=False)
+
     def execute(self, context):
-        skin_filepath = self.filepath
+        cgf_filepath = self.filepath
 
         try:
-            dae_filepath = cgf_handler.cgf_to_dae(skin_filepath)
-            self.report({'INFO'}, "Converting cgf to dae...")
+            dae_filepath = cgf_handler.cgf_to_dae(cgf_filepath)
+            self.report({'INFO'}, "Converting CGF to dae...")
             if not dae_filepath:
                 raise Exception("Failed to Convert CGF to dae")
             
             collada_handler.import_collada(dae_filepath, context, self)
             self.report({'INFO'}, "Model imported successfully.")
-            
+
         except Exception as e:
             self.report({'ERROR'}, f"Import failed: {e}")
             return {'CANCELLED'}
 
         return {'FINISHED'}
+
 
 # === Registration ===
 classes = (
