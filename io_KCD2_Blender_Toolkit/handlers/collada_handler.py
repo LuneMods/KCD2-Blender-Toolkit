@@ -17,10 +17,9 @@ def import_collada(filepath, context, operator):
         if obj.type == 'MESH':
             mesh = obj.data
             
-            #fix_vertex_colors(mesh) #leave as-is for now, vertex colors will be set using a different system.
             fix_material_slots(obj, filepath)
             set_smooth(mesh)
-            create_export_node(operator) #only the exporter so far
+            create_export_node(operator) #only the export node so far
 
             break #only 1x mesh per import supported for now
 
@@ -38,41 +37,6 @@ def set_smooth(mesh):
     
     bm.to_mesh(mesh)
     bm.free()
-    
-def fix_vertex_colors(mesh):
-    if mesh.vertex_colors:
-        vc_layer = mesh.vertex_colors.active  # Get active vertex color layer
-        new_layer = mesh.color_attributes.new(name="alpha", type='BYTE_COLOR', domain='CORNER')  
-
-        bm = bmesh.new()
-        bm.from_mesh(mesh)
-        bm.loops.layers.color.verify()
-        color_layer = bm.loops.layers.color.get(vc_layer.name)
-        new_color_layer = bm.loops.layers.color.get(new_layer.name)
-
-        for face in bm.faces:
-            for loop in face.loops:
-                original_color = loop[color_layer]
-                alpha = original_color[3]
-
-                srgb_alpha = linear_to_srgb(alpha)
-
-                loop[new_color_layer] = (srgb_alpha, 1, 1, 1)
-
-        bm.to_mesh(mesh)
-        bm.free()
-    
-def linear_to_srgb(linear):
-    if linear <= 0.0031308:
-        return 12.92 * linear
-    else:
-        return 1.055 * (linear ** (1.0 / 2.4)) - 0.055
-
-def srgb_to_linear(srgb):
-    if srgb <= 0.04045:
-        return srgb / 12.92
-    else:
-        return ((srgb + 0.055) / 1.055) ** 2.4
 
 def get_matched_materials(filepath):
     tree = ET.parse(filepath)
