@@ -295,26 +295,17 @@ class CrytekDaeExporter:
 
     def _write_vertex_colors(self, object_, bmesh_, mesh_node, geometry_name):
         float_colors = []
-        alpha_found = False
 
         active_layer = bmesh_.loops.layers.color.active
         if object_.data.vertex_colors:
-            if active_layer.name.lower() == 'alpha':
-                alpha_found = True
-                for vert in bmesh_.verts:
-                    loop = vert.link_loops[0]
-                    color = loop[active_layer]
-                    alpha_color = (color[0] + color[1] + color[2]) / 3.0
-                    float_colors.extend([1.0, 1.0, 1.0, alpha_color])
-            else:
-                for vert in bmesh_.verts:
-                    loop = vert.link_loops[0]
-                    color = loop[active_layer]
-                    float_colors.extend([color[0], color[1], color[2], color[3]])
+            for vert in bmesh_.verts:
+                loop = vert.link_loops[0]
+                color = loop[active_layer]
+                float_colors.extend([color[0], color[1], color[2], color[3]])
 
         if float_colors:
             id_ = "{!s}-vcol".format(geometry_name)
-            params = ("RGBA" if alpha_found else "RGBA")
+            params = "RGBA"
             source = utils.write_source(id_, "float", float_colors, params)
             mesh_node.appendChild(source)
 
@@ -409,7 +400,6 @@ class CrytekDaeExporter:
         technique = self._doc.createElement("technique")
         technique.setAttribute("profile", profile)
         double_sided = self._doc.createElement("double_sided")
-        #double_sided_value = self._doc.createTextNode("1")
         double_sided_value = self._doc.createTextNode("0")
         double_sided.appendChild(double_sided_value)
         technique.appendChild(double_sided)
@@ -1115,9 +1105,3 @@ if __name__ == "__main__":
 
     # test call
     bpy.ops.export_mesh.crytekdae('INVOKE_DEFAULT')
-
-def srgb_to_linear(srgb):
-    if srgb <= 0.04045:
-        return srgb / 12.92
-    else:
-        return ((srgb + 0.055) / 1.055) ** 2.4
