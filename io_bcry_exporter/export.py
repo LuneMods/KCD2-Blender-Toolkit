@@ -307,14 +307,19 @@ class CrytekDaeExporter:
 
         if rgb_layer or alpha_layer:
             for vert in bmesh_.verts:
+                if not vert.link_loops:
+                    print("Non-manifold geometry detected. cannot process vertex colors")
+                    return
+
                 loop = vert.link_loops[0]
                 rgb_color = loop[rgb_layer] if rgb_layer else (1.0, 1.0, 1.0)  # Default white if no RGB layer
                 alpha_value = loop[alpha_layer][0] if alpha_layer else 1.0  # Alpha from first component of alpha layer
 
                 float_colors.extend([rgb_color[0], rgb_color[1], rgb_color[2], alpha_value])
 
+
             id_ = f"{geometry_name}-vcol"
-            params = "RGBA" if alpha_layer else "RGBA"
+            params = "RGBA"
             source = utils.write_source(id_, "float", float_colors, params)
             mesh_node.appendChild(source)
 
