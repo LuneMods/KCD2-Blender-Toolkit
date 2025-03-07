@@ -11,22 +11,41 @@ def import_collada(filepath, context, operator):
     bpy.ops.wm.collada_import(filepath=filepath, custom_normals=operator.import_normals)
     filename = os.path.splitext(os.path.basename(filepath))[0]
 
-    # Process imported meshes
+    armature = None  # Store reference to armature
+    
+    glb_armature = None
+    if operator.glb_obj and operator.glb_obj.type == 'ARMATURE':
+        glb_armature = operator.glb_obj
+
     for obj in bpy.context.selected_objects:
         obj["mtl_directory"] = os.path.dirname(filepath)
-        if obj.type == 'MESH':
+
+        if obj.type == 'ARMATURE':
+            armature_name = obj.name
+            bpy.data.objects.remove(obj)
+            glb_armature.name = armature_name
+
+
+        elif obj.type == 'MESH':
             mesh = obj.data
-            
+
+            if glb_armature:
+                obj.parent = glb_armature
+
+                armature_modifier = obj.modifiers.new(name="Armature", type='ARMATURE')
+                armature_modifier.object = glb_armature
+
             fix_vertex_colors(mesh)
             fix_material_slots(obj, filepath)
             set_smooth(mesh)
-            create_export_node(operator) #only the export node so far
+            create_export_node(operator)
 
-            break #only 1x mesh per import supported for now
+            break  # Only 1x mesh per import supported for now
 
     print(obj["mtl_directory"])
     operator.report({'INFO'}, "Import and conversion completed successfully.")
     return obj
+
 
 def set_smooth(mesh):
     bm = bmesh.new()
@@ -37,6 +56,8 @@ def set_smooth(mesh):
     
     bm.to_mesh(mesh)
     bm.free()
+
+
 
 def get_matched_materials(filepath):
     tree = ET.parse(filepath)
