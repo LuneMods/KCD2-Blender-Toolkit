@@ -12,19 +12,18 @@ def import_collada(filepath, context, operator):
     filename = os.path.splitext(os.path.basename(filepath))[0]
 
     armature = None  # Store reference to armature
-    
     glb_armature = None
+
     if operator.glb_obj and operator.glb_obj.type == 'ARMATURE':
         glb_armature = operator.glb_obj
 
     for obj in bpy.context.selected_objects:
         obj["mtl_directory"] = os.path.dirname(filepath)
 
-        if obj.type == 'ARMATURE':
+        if obj.type == 'ARMATURE' and glb_armature:
             armature_name = obj.name
             bpy.data.objects.remove(obj)
             glb_armature.name = armature_name
-
 
         elif obj.type == 'MESH':
             mesh = obj.data
@@ -39,11 +38,7 @@ def import_collada(filepath, context, operator):
             fix_material_slots(obj, filepath)
             set_smooth(mesh)
             create_export_node(operator)
-
-            break  # Only 1x mesh per import supported for now
-
-    print(obj["mtl_directory"])
-    operator.report({'INFO'}, "Import and conversion completed successfully.")
+    
     return obj
 
 

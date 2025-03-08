@@ -25,9 +25,12 @@ class Importer_KCD2_Collada(bpy.types.Operator, ImportHelper):
 
     def execute(self, context):
         filepath = self.filepath
-        report = collada_handler.import_collada(filepath, context, self)
+        self.dae_obj = collada_handler.import_collada(filepath, context, self)
 
-        return report
+        if self.dae_obj:
+            return {'FINISHED'}
+        else:
+            return {'CANCELLED'}
 
 
 class Importer_KCD2_SKIN(bpy.types.Operator, ImportHelper):
