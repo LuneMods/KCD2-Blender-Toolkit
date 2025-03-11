@@ -100,7 +100,7 @@ class _DAEConverter:
                     "/threads={processors}",
                     "/verbose=2",
                     "/refresh",
-                    "/vertexpositionformat=f16",
+                    "/vertexpositionformat=f32",
                     out_file]
                 rc_second_pass = subprocess.Popen(args)
             elif node_type == 'i_caf':
